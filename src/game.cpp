@@ -1,5 +1,6 @@
 #include "game.h"
 #include <iostream>
+#include <future>
 #include "SDL.h"
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
@@ -67,7 +68,7 @@ void Game::PlaceFood() {
 
 void Game::Update() {
   if (!snake.alive) return;
-
+  std::this_thread::sleep_for(std::chrono::milliseconds(1));
   snake.Update();
 
   int new_x = static_cast<int>(snake.head_x);
@@ -83,5 +84,9 @@ void Game::Update() {
   }
 }
 
-int Game::GetScore() const { return score; }
-int Game::GetSize() const { return snake.size; }
+int Game::GetScore() const { 
+  return score; 
+}
+int Game::GetSize() const { 
+  return snake.size; 
+}

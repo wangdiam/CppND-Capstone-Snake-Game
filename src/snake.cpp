@@ -1,6 +1,74 @@
 #include "snake.h"
 #include <cmath>
 #include <iostream>
+#include <mutex>
+
+Snake::Snake(const Snake &source)
+{
+    std::unique_lock<std::mutex> lck(_mutex);
+    std::unique_lock<std::mutex> lck_src(source._mutex);
+    speed = source.speed;
+    grid_height = source.grid_height;
+    grid_width = source.grid_width;
+    size = source.size;
+    alive = source.alive;
+    head_x = source.head_x;
+    head_y = source.head_y;
+    body = source.body;
+    growing = source.growing;
+}
+
+
+Snake::Snake(Snake &&source)
+{
+    std::unique_lock<std::mutex> lck(_mutex);
+    std::unique_lock<std::mutex> lck_src(source._mutex);
+    grid_height = source.grid_height;
+    grid_width = source.grid_width;
+    speed = source.speed;
+    size = source.size;
+    alive = source.alive;
+    head_x = source.head_x;
+    head_y = source.head_y;
+    body = std::move(source.body);
+    growing = source.growing;
+}
+
+Snake &Snake::operator=(const Snake &source)
+{
+  	if (this == &source)
+        return *this;
+    std::unique_lock<std::mutex> lck(_mutex);
+    std::unique_lock<std::mutex> lck_src(source._mutex);
+    grid_height = source.grid_height;
+    grid_width = source.grid_width;
+    speed = source.speed;
+    size = source.size;
+    alive = source.alive;
+    head_x = source.head_x;
+    head_y = source.head_y;
+    body = source.body;
+    growing = source.growing;
+    return *this;
+}
+
+
+Snake &Snake::operator=(Snake &&source)
+{ 
+    if (this == &source) return *this;
+    std::unique_lock<std::mutex> lck(_mutex);
+    std::unique_lock<std::mutex> lck_src(source._mutex);
+    grid_height = source.grid_height;
+    grid_width = source.grid_width;
+    speed = source.speed;
+    size = source.size;
+    alive = source.alive;
+    head_x = source.head_x;
+    head_y = source.head_y;
+    body = std::move(source.body);
+    growing = source.growing;
+    return *this;
+}
 
 void Snake::Update() {
   SDL_Point prev_cell{
@@ -20,6 +88,7 @@ void Snake::Update() {
 }
 
 void Snake::UpdateHead() {
+  std::unique_lock<std::mutex> lck(_mutex);
   switch (direction) {
     case Direction::kUp:
       head_y -= speed;
@@ -44,6 +113,7 @@ void Snake::UpdateHead() {
 }
 
 void Snake::UpdateBody(SDL_Point &current_head_cell, SDL_Point &prev_head_cell) {
+  std::unique_lock<std::mutex> lck(_mutex);
   // Add previous head location to vector
   body.push_back(prev_head_cell);
 
@@ -63,10 +133,14 @@ void Snake::UpdateBody(SDL_Point &current_head_cell, SDL_Point &prev_head_cell) 
   }
 }
 
-void Snake::GrowBody() { growing = true; }
+void Snake::GrowBody() { 
+  std::unique_lock<std::mutex> lck(_mutex);
+  growing = true; 
+}
 
 // Inefficient method to check if cell is occupied by snake.
 bool Snake::SnakeCell(int x, int y) {
+  std::unique_lock<std::mutex> lck(_mutex);
   if (x == static_cast<int>(head_x) && y == static_cast<int>(head_y)) {
     return true;
   }
