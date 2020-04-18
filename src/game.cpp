@@ -78,9 +78,11 @@ void Game::Update(Renderer &renderer) {
   int bonus = random_bonus(engine);
   if (foodcount == 0) {
     if (bonus == 0) {
-      PlaceFood();
-      PlaceFood();
-      PlaceFood();
+      std::uniform_int_distribution<int> bonus_foods(2,10);
+      int new_foods = bonus_foods(engine);
+      for (int i=0;i<new_foods;i++) {
+        PlaceFood();
+      }
     } else {
       PlaceFood();
     }
