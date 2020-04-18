@@ -1,0 +1,3 @@
+/home/wangdiam/C++ Nanodegree Projects/CppND-Capstone-Snake-Game/build/CMakeFiles/rebuild_cache.dir
+/home/wangdiam/C++ Nanodegree Projects/CppND-Capstone-Snake-Game/build/CMakeFiles/SnakeGame.dir
+/home/wangdiam/C++ Nanodegree Projects/CppND-Capstone-Snake-Game/build/CMakeFiles/edit_cache.dir

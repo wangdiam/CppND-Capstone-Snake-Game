@@ -1,13 +1,15 @@
 #include "game.h"
 #include <iostream>
+#include <algorithm>
 #include <future>
 #include "SDL.h"
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
-    : snake(grid_width, grid_height),
+    : snake(grid_width, grid_height), foodcount(0),
       engine(dev()),
       random_w(0, static_cast<int>(grid_width)),
-      random_h(0, static_cast<int>(grid_height)) {
+      random_h(0, static_cast<int>(grid_height)),
+      random_bonus(0,2) {
   PlaceFood();
 }
 
@@ -25,8 +27,8 @@ void Game::Run(Controller const &controller, Renderer &renderer,
 
     // Input, Update, Render - the main game loop.
     controller.HandleInput(running, snake);
-    Update();
-    renderer.Render(snake, food);
+    Update(renderer);
+    renderer.Render(snake, foods);
 
     frame_end = SDL_GetTicks();
 
@@ -58,30 +60,47 @@ void Game::PlaceFood() {
     y = random_h(engine);
     // Check that the location is not occupied by a snake item before placing
     // food.
+    std::cout<<"Food count: " << foodcount << std::endl;
     if (!snake.SnakeCell(x, y)) {
-      food.x = x;
-      food.y = y;
+      SDL_Point food = {x,y};
+      foodcount++;
+      foods.emplace_back(food);
       return;
     }
   }
 }
 
-void Game::Update() {
+void Game::Update(Renderer &renderer) {
   if (!snake.alive) return;
   std::this_thread::sleep_for(std::chrono::milliseconds(1));
   snake.Update();
 
-  int new_x = static_cast<int>(snake.head_x);
-  int new_y = static_cast<int>(snake.head_y);
-
-  // Check if there's food over here
-  if (food.x == new_x && food.y == new_y) {
-    score++;
-    PlaceFood();
-    // Grow snake and increase speed.
-    snake.GrowBody();
-    snake.speed += 0.02;
+  int bonus = random_bonus(engine);
+  if (foodcount == 0) {
+    if (bonus == 0) {
+      PlaceFood();
+      PlaceFood();
+      PlaceFood();
+    } else {
+      PlaceFood();
+    }
   }
+  for (int i=0;i<foods.size();i++) {
+    SDL_Point food = foods.at(i);
+    int new_x = static_cast<int>(snake.head_x);
+    int new_y = static_cast<int>(snake.head_y);
+    if (food.x == new_x && food.y == new_y) {
+      score++;
+      std::cout<<"Food count: " << foodcount << std::endl;
+      foodcount--;
+      foods.erase(foods.begin() + i);
+      snake.GrowBody();
+      snake.speed += 0.02;
+      break;
+    }
+  }
+  // Check if there's food over here
+    // Grow snake and increase speed.
 }
 
 int Game::GetScore() const { 

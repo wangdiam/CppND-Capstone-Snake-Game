@@ -15,12 +15,13 @@ class Snake {
         head_x(grid_width / 2),
         head_y(grid_height / 2) {}
 
-  Snake(const Snake &source);
-  Snake &operator=(const Snake &source); 
-  Snake(Snake &&source);
-  Snake &operator=(Snake &&source); 
+  Snake(const Snake &src);
+  Snake &operator=(const Snake &src); 
+  Snake(Snake &&src);
+  Snake &operator=(Snake &&src); 
 
   void Update();
+  void ChangeDirection(Direction new_dir);
   
 
   void GrowBody();

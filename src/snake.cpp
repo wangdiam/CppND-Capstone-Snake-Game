@@ -3,70 +3,66 @@
 #include <iostream>
 #include <mutex>
 
-Snake::Snake(const Snake &source)
-{
+Snake::Snake(const Snake &src) {
     std::unique_lock<std::mutex> lck(_mutex);
-    std::unique_lock<std::mutex> lck_src(source._mutex);
-    speed = source.speed;
-    grid_height = source.grid_height;
-    grid_width = source.grid_width;
-    size = source.size;
-    alive = source.alive;
-    head_x = source.head_x;
-    head_y = source.head_y;
-    body = source.body;
-    growing = source.growing;
+    std::unique_lock<std::mutex> lck_src(src._mutex);
+    speed = src.speed;
+    grid_height = src.grid_height;
+    grid_width = src.grid_width;
+    size = src.size;
+    alive = src.alive;
+    head_x = src.head_x;
+    head_y = src.head_y;
+    body = src.body;
+    growing = src.growing;
 }
 
 
-Snake::Snake(Snake &&source)
-{
+Snake::Snake(Snake &&src) {
     std::unique_lock<std::mutex> lck(_mutex);
-    std::unique_lock<std::mutex> lck_src(source._mutex);
-    grid_height = source.grid_height;
-    grid_width = source.grid_width;
-    speed = source.speed;
-    size = source.size;
-    alive = source.alive;
-    head_x = source.head_x;
-    head_y = source.head_y;
-    body = std::move(source.body);
-    growing = source.growing;
+    std::unique_lock<std::mutex> lck_src(src._mutex);
+    grid_height = src.grid_height;
+    grid_width = src.grid_width;
+    speed = src.speed;
+    size = src.size;
+    alive = src.alive;
+    head_x = src.head_x;
+    head_y = src.head_y;
+    body = std::move(src.body);
+    growing = src.growing;
 }
 
-Snake &Snake::operator=(const Snake &source)
-{
-  	if (this == &source)
+Snake &Snake::operator=(const Snake &src) {
+  	if (this == &src)
         return *this;
     std::unique_lock<std::mutex> lck(_mutex);
-    std::unique_lock<std::mutex> lck_src(source._mutex);
-    grid_height = source.grid_height;
-    grid_width = source.grid_width;
-    speed = source.speed;
-    size = source.size;
-    alive = source.alive;
-    head_x = source.head_x;
-    head_y = source.head_y;
-    body = source.body;
-    growing = source.growing;
+    std::unique_lock<std::mutex> lck_src(src._mutex);
+    grid_height = src.grid_height;
+    grid_width = src.grid_width;
+    speed = src.speed;
+    size = src.size;
+    alive = src.alive;
+    head_x = src.head_x;
+    head_y = src.head_y;
+    body = src.body;
+    growing = src.growing;
     return *this;
 }
 
 
-Snake &Snake::operator=(Snake &&source)
-{ 
-    if (this == &source) return *this;
+Snake &Snake::operator=(Snake &&src) { 
+    if (this == &src) return *this;
     std::unique_lock<std::mutex> lck(_mutex);
-    std::unique_lock<std::mutex> lck_src(source._mutex);
-    grid_height = source.grid_height;
-    grid_width = source.grid_width;
-    speed = source.speed;
-    size = source.size;
-    alive = source.alive;
-    head_x = source.head_x;
-    head_y = source.head_y;
-    body = std::move(source.body);
-    growing = source.growing;
+    std::unique_lock<std::mutex> lck_src(src._mutex);
+    grid_height = src.grid_height;
+    grid_width = src.grid_width;
+    speed = src.speed;
+    size = src.size;
+    alive = src.alive;
+    head_x = src.head_x;
+    head_y = src.head_y;
+    body = std::move(src.body);
+    growing = src.growing;
     return *this;
 }
 
@@ -85,6 +81,28 @@ void Snake::Update() {
   if (current_cell.x != prev_cell.x || current_cell.y != prev_cell.y) {
     UpdateBody(current_cell, prev_cell);
   }
+}
+
+void Snake::ChangeDirection(Snake::Direction new_dir) {
+  Snake::Direction opposite;
+  switch(new_dir) {
+    case Snake::Direction::kDown: 
+      opposite = Snake::Direction::kUp; 
+      break;
+    case Snake::Direction::kUp: 
+      opposite = Snake::Direction::kDown;
+      break;
+    case Snake::Direction::kLeft: 
+      opposite = Snake::Direction::kRight; 
+      break;
+    case Snake::Direction::kRight: 
+      opposite = Snake::Direction::kLeft;
+      break;
+  }
+  std::unique_lock<std::mutex> lck(_mutex);
+  if (direction != opposite || size == 1) 
+    direction = new_dir;
+  return;
 }
 
 void Snake::UpdateHead() {
