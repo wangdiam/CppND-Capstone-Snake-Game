@@ -27,7 +27,6 @@ class Game {
   std::uniform_int_distribution<int> random_bonus;
 
   int score{0};
-  int foodcount;
   void PlaceFood();
   void Update(Renderer &renderer);
 };

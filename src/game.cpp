@@ -5,7 +5,7 @@
 #include "SDL.h"
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
-    : snake(grid_width, grid_height), foodcount(0),
+    : snake(grid_width, grid_height),
       engine(dev()),
       random_w(0, static_cast<int>(grid_width)),
       random_h(0, static_cast<int>(grid_height)),
@@ -60,10 +60,8 @@ void Game::PlaceFood() {
     y = random_h(engine);
     // Check that the location is not occupied by a snake item before placing
     // food.
-    std::cout<<"Food count: " << foodcount << std::endl;
     if (!snake.SnakeCell(x, y)) {
       SDL_Point food = {x,y};
-      foodcount++;
       foods.emplace_back(food);
       return;
     }
@@ -76,7 +74,7 @@ void Game::Update(Renderer &renderer) {
   snake.Update();
 
   int bonus = random_bonus(engine);
-  if (foodcount == 0) {
+  if (foods.size() == 0) {
     if (bonus == 0) {
       std::uniform_int_distribution<int> bonus_foods(2,10);
       int new_foods = bonus_foods(engine);
@@ -93,8 +91,6 @@ void Game::Update(Renderer &renderer) {
     int new_y = static_cast<int>(snake.head_y);
     if (food.x == new_x && food.y == new_y) {
       score++;
-      std::cout<<"Food count: " << foodcount << std::endl;
-      foodcount--;
       foods.erase(foods.begin() + i);
       snake.GrowBody();
       snake.speed += 0.02;
